@@ -1,4 +1,4 @@
-IPFS API wrapper library in Clojure 
+IPFS API wrapper in Clojure 
 ===================================
 
 > A **very** simple wrapper for interacting with [IPFS](https://ipfs.io) API
