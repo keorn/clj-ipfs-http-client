@@ -5,7 +5,7 @@ IPFS API wrapper in Clojure
 
 ## Get it
 ```clojure
-[clj-ipfs-api "1.0"]
+[clj-ipfs-api "1.1"]
 
 ;; In your ns statement:
 (ns my.ns
@@ -25,12 +25,20 @@ Launch the [IPFS Daemon](https://ipfs.io/docs/getting-started/).
   "/ip4/188.166.8.195/tcp/4001/ipfs/QmNU1Vpryj5hfSmybSYHnS497ttgy9aNJ3T2B8wY2uMso4")
 ;; flags go in a map
 (ipfs :object :get "QmaaqrHyAQm7gALkRW8DcfGX3u8q9rWKnxEMmf7m9z515w" {:encoding "json"}) 
-
-;; for different API server use ipfs-custom, all options work the same
-(ipfs-custom "http://127.0.0.1:55555" :swarm :peers)
 ```
 
-Exception is thrown, if wrong command or flag key is passed
+Exception is thrown, if wrong command or flag key is passed.
+
+```clojure
+;; for different API server use ipfs-custom, all options work the same
+(ipfs-custom {:url "http://127.0.0.1:55555"} :swarm :peers)
+
+;; for big files use a stream, no parsing is done in this case
+(ipfs-custom {:as :stream} :swarm :peers)
+```
+
+For more options that are taken by `ipfs-custom` map,
+look at the second argument of get function in [clj-http](https://github.com/dakrone/clj-http#get).
 
 ### License
 

@@ -1,5 +1,5 @@
 (ns clj-ipfs-api.core
-  (require [cheshire.core :refer [decode]]
+  (require [clj-http.client :as client]
            [clojure.string :refer [join]]))
 
 (defn- check-commands [commands]
@@ -22,19 +22,29 @@
           flag-keys))
       (throw (Exception. "Wrong IPFS API flag key."))))
 
-(defn- assemble-suffix [commands args [flags]]
-  (check-commands commands)
-  (check-flags (keys flags))
-  (let [joined-commands (join "/" (map name commands))
-        prefixed-args   (map (partial str "arg=") args)
-        infixed-flags   (for [[flag value] flags] (str (name flag) "=" value))]
-    (str joined-commands "?" (join "&" (concat prefixed-args infixed-flags)))))
-
-(defn ipfs-custom [server & all]
-  (let [{commands true, other false} (group-by keyword? all)
+(defn- assemble-query-params [params ipfs-args]
+  (let [{commands true, other false} (group-by keyword? ipfs-args)
         {args true, flags false}     (group-by string? other)
-        suffix                       (assemble-suffix commands args flags)
-        address                      (str server "/api/v0/" suffix)] 
-    (decode (slurp address))))
+        suffix                       (join "/" (map name commands))
+        full-url                     (str (:url params) "/api/v0/" suffix)]
+    (check-commands commands)
+    (check-flags (keys flags))
+    (assoc params 
+           :method :get
+           :url full-url
+           :query-params (if args (assoc flags :arg args)))))
 
-(def ipfs (partial ipfs-custom "http://127.0.0.1:5001")) 
+(defn- api-request [query-params]
+  (let [{:keys [status headers body error]} (client/request query-params)]
+    (println headers)
+    (if error
+        (println "Failed with exception: " error)
+        body)))
+
+(defn ipfs-custom [request-params & ipfs-args]
+  (let [query-params (assemble-query-params (merge {:url "http://127.0.0.1:5001" :as :json}
+                                                   request-params)
+                                            ipfs-args)]
+    (api-request query-params)))
+
+(def ipfs (partial ipfs-custom {})) 
