@@ -5,7 +5,7 @@ IPFS API wrapper in Clojure
 
 ## Get it
 ```clojure
-[clj-ipfs-api "1.2"]
+[clj-ipfs-api "1.2.1"]
 
 ;; In your ns statement:
 (ns my.ns
@@ -27,7 +27,12 @@ Launch the [IPFS Daemon](https://ipfs.io/docs/getting-started/).
 (ipfs/swarm-peers {:type "indirect"}) 
 ```
 
-Everything is decoded from json, except cat.
+Custom API server address has to be set up.
+```clojure
+(ipfs/set-api-url! "http://127.0.0.1:55555")
+```
+
+Everything is decoded from json, except `cat`.
 To change request options use a map under `:request` key.
 
 ```clojure
@@ -46,4 +51,4 @@ look at the second argument of request function in [clj-http](https://github.com
 Distributed under the Eclipse Public License either version 1.0 or (at
 your option) any later version.
 
-Copyright © 2015- keorn
+Copyright © 201 keorn

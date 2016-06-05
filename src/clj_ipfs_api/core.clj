@@ -4,16 +4,15 @@
             [clojure.string :refer [join]])
   (:refer-clojure :exclude [get resolve update cat]))
            
+(def ^:private api-url (atom "http://127.0.0.1:5001"))
 
-(def ^:private default-url "http://127.0.0.1:5001")
-
-(defn assemble-query
+(defn- assemble-query
   "Assemble a map ready for request."
   [cmd-vec all-args]
   (let [{args true, [params] false} (group-by string? all-args)
         base-url                    (clojure.core/get (:request params)
                                                       :url
-                                                      default-url)
+                                                      @api-url)
         full-url                    (str base-url
                                          "/api/v0/"
                                          (join "/" cmd-vec))
@@ -23,27 +22,21 @@
                   (:request params)) 
            :method :get
            :url full-url
-           :query-params (if args
-                             (assoc ipfs-params :arg args)
-                             ipfs-params))))
-
-(defn api-request
+           :query-params (if args (assoc ipfs-params :arg args) ipfs-params))))
+(defn- api-request
   "The same as used by clj-http."
   [raw-map]
   (let [json?       (= :json (:as raw-map)) ; Fiddle around to make it look the same as clj-http
-        request-map (if json? (assoc raw-map :as :text) raw-map)
+        request-map (conj raw-map (when json? [:as :text]))
         {:keys [status headers body error]} @(http/request request-map)]
-    (if error
-        (println "Failed with exception: " error)
-        (if json? (parse-string body true) body))))
+    (when-not error (if json? (parse-string body true) body))))
 
 ; Bootstrapping using `ipfs commands`
-(defn empty-fn
+(defn- empty-fn
   "Template function used for generation."
   [cmd-vec]
   (fn [& args]
     (api-request (assemble-query cmd-vec args))))
-
 (defn- unpack-cmds
   "Traverse the nested structure to get vectors of commands."
   [acc cmds]
@@ -52,11 +45,18 @@
                 (list (conj acc Name))
                 (unpack-cmds (conj acc Name) Subcommands)))
           cmds))
+(defn- setup!
+  "Request and intern all of the commands."
+  []
+  (if-let [cmd-raw  ((empty-fn ["commands"]))]
+    (let [cmd-vecs (unpack-cmds [] (:Subcommands cmd-raw))]
+      (doseq [cmd-vec cmd-vecs]
+        (intern *ns*
+                (symbol (join "-" cmd-vec))
+                (empty-fn cmd-vec))))
+    (println "Could not set up using the"
+             @api-url
+             "address, please pick one with `set-api-url!`.")))
 
-; Intern all the commands
-(let [cmd-raw  ((empty-fn ["commands"]))
-      cmd-vecs (unpack-cmds [] (:Subcommands cmd-raw))]
-  (doseq [cmd-vec cmd-vecs]
-    (intern *ns*
-            (symbol (join "-" cmd-vec))
-            (empty-fn cmd-vec))))
+(setup!) ; Try to setup using the default address.
+(defn set-api-url! [new-url] (reset! api-url new-url) (setup!))
