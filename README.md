@@ -5,7 +5,7 @@ IPFS API wrapper in Clojure
 
 ## Get it
 ```clojure
-[clj-ipfs-api "1.2.1"]
+[clj-ipfs-api "1.2.2"]
 
 ;; In your ns statement:
 (ns my.ns

@@ -1,4 +1,4 @@
-(defproject clj-ipfs-api "1.2.1"
+(defproject clj-ipfs-api "1.2.2"
   :description "Clojure IPFS API wrapper"
   :url "https://github.com/keorn/clj-ipfs-api"
   :license {:name "Eclipse Public License"
