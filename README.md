@@ -51,4 +51,4 @@ look at the second argument of request function in [clj-http](https://github.com
 Distributed under the Eclipse Public License either version 1.0 or (at
 your option) any later version.
 
-Copyright © 201 keorn
+2016 keorn
