@@ -45,10 +45,3 @@ To change request options use a map under `:request` key.
 
 For more options that are taken by the `:request` map,
 look at the second argument of request function in [clj-http](https://github.com/dakrone/clj-http#raw-request).
-
-### License
-
-Distributed under the Eclipse Public License either version 1.0 or (at
-your option) any later version.
-
-2016 keorn
