@@ -16,7 +16,7 @@
         ipfs-params                 (dissoc params :request)]
     ; text for cat, json for everything else
     (assoc (merge {:as (if (= (last cmd-vec) "cat") :text :json)
-                   :method :get}
+                   :method :post}
                   (:request params))
            :url full-url
            :query-params (if args (assoc ipfs-params :arg args) ipfs-params))))
